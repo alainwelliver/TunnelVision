@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  TunnelVision
 //
-//  Created by Alain Welliver on 4/1/26.
+//  Started by Alain Welliver on 4/1/26. Completed using AI assistnace with Claude Code's Claude 4.5 Sonnet
 //
 
 import SwiftUI
