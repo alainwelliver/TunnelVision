@@ -18,11 +18,10 @@ struct Waypoint {
 final class PedometerViewModel: ObservableObject {
 
     let route: [Waypoint] = [
-        Waypoint(id: 1, name: "Start: AGH Lobby",      instruction: "Begin walking toward the main corridor", stepThreshold: 0),
-        Waypoint(id: 2, name: "Main Corridor",          instruction: "Continue straight past the elevators",   stepThreshold: 30),
-        Waypoint(id: 3, name: "Corridor Junction",      instruction: "Bear left at the junction",              stepThreshold: 65),
-        Waypoint(id: 4, name: "Exit Hallway",           instruction: "Walk toward the exit doors",             stepThreshold: 100),
-        Waypoint(id: 5, name: "Arrived: 34th St Exit",  instruction: "You have arrived.",                      stepThreshold: 130),
+        Waypoint(id: 1, name: "Start: HCI Classroom",  instruction: "Walk straight toward the door",          stepThreshold: 0),
+        Waypoint(id: 2, name: "Classroom Door",         instruction: "Turn right and walk down the hallway",   stepThreshold: 10),
+        Waypoint(id: 3, name: "Hallway Junction",       instruction: "Turn right toward the elevators",        stepThreshold: 40),
+        Waypoint(id: 4, name: "Arrived: Elevators",     instruction: "You have arrived.",                      stepThreshold: 50),
     ]
 
     @Published var stepCount: Int = 0
@@ -65,9 +64,12 @@ final class PedometerViewModel: ObservableObject {
         startTracking()
     }
 
+    private let triggerOffset = 5
+
     private func updateWaypoint() {
         for i in stride(from: route.count - 1, through: 0, by: -1) {
-            if stepCount >= route[i].stepThreshold {
+            let trigger = max(0, route[i].stepThreshold - triggerOffset)
+            if stepCount >= trigger {
                 if i != currentWaypointIndex {
                     currentWaypointIndex = i
                 }
