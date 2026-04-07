@@ -42,7 +42,7 @@ struct HelloStylesView: View {
                 
                 //Typography section
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Typography (System Fallback for Inter)")
+                    Text("Typography")
                         .font(.headline)
                     
                     ForEach(fontSizes, id: \.self) { size in
