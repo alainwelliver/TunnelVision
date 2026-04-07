@@ -6,8 +6,10 @@ class TransitViewModel: ObservableObject {
     @Published var nextTrains: [Train] = []
     @Published var isLoading = true
     
-    // We publish the current time so the UI redreaws every second when it ticks
-    @Published var currentTime = Date() 
+    //publish the current time so the UI redreaws for the ticks
+    @Published var currentTime = Date()
+    @Published var showMissedAlert = false
+    @Published var missedTrainName = ""
     
     private let apiService = TransitAPIService()
     private var timer: Timer?
@@ -26,9 +28,9 @@ class TransitViewModel: ObservableObject {
     }
     
     private func startTimer() {
-        timer?.invalidate() // Clear any existing timers just in case
+        timer?.invalidate()
         
-        // Fire every 1.0 seconds
+        // every 1 sec
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.tick()
@@ -37,10 +39,18 @@ class TransitViewModel: ObservableObject {
     }
     
     private func tick() {
-        // 1. Update the current time to force the UI to redraw the countdown strings
         currentTime = Date()
         
-        // 2. If a train's arrival time has passed, remove it from the array!
+        //if train hits 0
+        let missedTrains = nextTrains.filter { $0.arrivalTime < currentTime }
+        
+        // trigger alert to let user know
+        if let justMissed = missedTrains.first {
+            missedTrainName = justMissed.routeName
+            showMissedAlert = true
+        }
+        
+        //them remove it
         nextTrains.removeAll { $0.arrivalTime < currentTime }
     }
 }
