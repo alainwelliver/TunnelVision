@@ -1,29 +1,25 @@
 #if os(iOS)
-import AVFoundation
+import ARKit
 import SwiftUI
 import UIKit
 
-final class PreviewContainerView: UIView {
-    override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+/// Shows the live camera feed from an ARKit session (replaces the old AVCaptureSession preview).
+struct ARCameraPreview: UIViewRepresentable {
+    let session: ARSession
 
-    var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
-}
-
-struct CameraPreview: UIViewRepresentable {
-    let session: AVCaptureSession
-
-    func makeUIView(context: Context) -> PreviewContainerView {
-        let view = PreviewContainerView()
-        view.previewLayer.session = session
-        view.previewLayer.videoGravity = .resizeAspectFill
-        return view
+    func makeUIView(context: Context) -> ARSCNView {
+        let arView = ARSCNView()
+        arView.session = session
+        arView.automaticallyUpdatesLighting = false
+        arView.rendersContinuously = true
+        arView.contentMode = .scaleAspectFill
+        return arView
     }
 
-    func updateUIView(_ uiView: PreviewContainerView, context: Context) {
-        if uiView.previewLayer.session !== session {
-            uiView.previewLayer.session = session
+    func updateUIView(_ uiView: ARSCNView, context: Context) {
+        if uiView.session !== session {
+            uiView.session = session
         }
-        uiView.previewLayer.videoGravity = .resizeAspectFill
     }
 }
 #endif

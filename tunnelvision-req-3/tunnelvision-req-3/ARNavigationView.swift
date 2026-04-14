@@ -6,40 +6,46 @@ import UIKit
 private let tunnelGreen = Color(red: 23 / 255, green: 201 / 255, blue: 100 / 255)
 
 struct ARNavigationView: View {
-    @StateObject private var camera = CameraSession()
+    @StateObject private var arTracker = ARPositionTracker()
     @StateObject private var motion = DeviceMotionOverlay()
+    @StateObject private var routeNav = TunnelRouteNavigator()
 
     var body: some View {
         ZStack {
-            if camera.isConfigured, camera.errorMessage == nil {
-                CameraPreview(session: camera.session)
-                    .ignoresSafeArea()
-            } else {
-                Color.black.ignoresSafeArea()
+            ARCameraPreview(session: arTracker.session)
+                .ignoresSafeArea()
+
+            if let err = arTracker.errorMessage {
+                trackingBanner(err)
             }
 
-            if let err = camera.errorMessage {
-                VStack(spacing: 12) {
-                    Image(systemName: "camera.fill")
-                        .font(.largeTitle)
-                    Text(err)
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal)
-                }
-            } else {
-                overlayContent
-            }
+            overlayContent
         }
         .onAppear {
-            camera.requestAccessAndStart()
+            arTracker.start()
             motion.start()
+            routeNav.start(tracker: arTracker)
         }
         .onDisappear {
-            camera.stop()
+            routeNav.stop()
             motion.stop()
+            arTracker.stop()
+        }
+        .onChange(of: motion.magneticHeadingDegrees) { _, newValue in
+            routeNav.updateDeviceHeadingDegrees(newValue)
         }
         .statusBarHidden(false)
+    }
+
+    private func trackingBanner(_ message: String) -> some View {
+        Text(message)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(.ultraThinMaterial, in: Capsule())
+            .frame(maxHeight: .infinity, alignment: .top)
+            .padding(.top, 60)
     }
 
     private var overlayContent: some View {
@@ -62,6 +68,9 @@ struct ARNavigationView: View {
 
     private var trainBanner: some View {
         HStack(spacing: 8) {
+            Text("v5")
+                .font(.caption2.monospaced())
+                .foregroundStyle(.white.opacity(0.5))
             Text("Next")
                 .font(.subheadline.weight(.medium))
             ZStack {
@@ -92,14 +101,14 @@ struct ARNavigationView: View {
                 .font(.system(size: 36, weight: .semibold))
                 .foregroundStyle(tunnelGreen.opacity(0.9))
 
-            Text("Walk Straight")
+            Text(routeNav.primaryInstruction)
                 .font(.title.weight(.bold))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.5), radius: 4, y: 2)
         }
         .offset(stabilizedOffset)
-        .rotationEffect(.degrees(-motion.directionRotationDegrees))
-        .animation(.easeOut(duration: 0.1), value: motion.directionRotationDegrees)
+        .rotationEffect(.degrees(routeNav.arrowRotationDegrees))
+        .animation(.easeOut(duration: 0.12), value: routeNav.arrowRotationDegrees)
         .animation(.easeOut(duration: 0.1), value: motion.offset)
     }
 
@@ -109,8 +118,11 @@ struct ARNavigationView: View {
 
     private var infoCards: some View {
         HStack(spacing: 12) {
-            floatingCard(title: "Time remaining", value: "~2:43")
-            floatingCard(title: "Next train", value: "4:12")
+            floatingCard(
+                title: "Waypoint \(min(routeNav.currentLegIndex + 1, routeNav.totalLegs))/\(routeNav.totalLegs)",
+                value: "\(Int(routeNav.distanceToNextWaypoint)) m"
+            )
+            floatingCard(title: "Steps", value: "\(routeNav.sessionSteps)")
         }
     }
 
