@@ -42,6 +42,18 @@ final class NavigationViewModel: ObservableObject {
     // counts down per-leg even when AR auto-advances ahead of the pedometer.
     @Published var stepCountAtLegStart: Int = 0
 
+    // Heading the user had when the current leg began. Shared across 2D and AR
+    // so arrow rotation persists through mode switches mid-leg. Cleared only
+    // when the leg itself changes; re-seeded by whichever view currently has a
+    // heading.
+    @Published var legAxisHeadingDegrees: Double? = nil
+
+    func seedLegAxisIfNeeded(_ heading: Double) {
+        if legAxisHeadingDegrees == nil {
+            legAxisHeadingDegrees = heading
+        }
+    }
+
     private let pedometer = CMPedometer()
 
     // Throttle for pedometer-driven auto-advance. Guarantees each instruction
@@ -108,6 +120,7 @@ final class NavigationViewModel: ObservableObject {
         arrived = false
         stepCount = 0
         stepCountAtLegStart = 0
+        legAxisHeadingDegrees = nil
         lastAdvanceAt = nil
         selectedTab = 1
         startPedometer()
@@ -148,6 +161,7 @@ final class NavigationViewModel: ObservableObject {
         arrived = false
         stepCount = 0
         stepCountAtLegStart = 0
+        legAxisHeadingDegrees = nil
         lastAdvanceAt = nil
         startStation = nil
         destStation = nil
@@ -169,6 +183,7 @@ final class NavigationViewModel: ObservableObject {
         } else {
             currentStepIndex += 1
             stepCountAtLegStart = stepCount
+            legAxisHeadingDegrees = nil
             fireDirectionHaptic()
         }
     }
@@ -177,6 +192,7 @@ final class NavigationViewModel: ObservableObject {
         if currentStepIndex > 0 {
             currentStepIndex -= 1
             stepCountAtLegStart = stepCount
+            legAxisHeadingDegrees = nil
         }
     }
 
@@ -225,6 +241,7 @@ final class NavigationViewModel: ObservableObject {
             if nextIndex >= wps.count - 1 {
                 currentStepIndex = steps.count - 1
                 stepCountAtLegStart = stepCount
+                legAxisHeadingDegrees = nil
                 lastAdvanceAt = Date()
                 fireDirectionHaptic()
                 arrived = true
@@ -232,6 +249,7 @@ final class NavigationViewModel: ObservableObject {
             } else {
                 currentStepIndex = nextIndex
                 stepCountAtLegStart = stepCount
+                legAxisHeadingDegrees = nil
                 lastAdvanceAt = Date()
                 fireDirectionHaptic()
             }
