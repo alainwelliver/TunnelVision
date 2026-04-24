@@ -172,6 +172,7 @@ struct ARNavigationView: View {
 
             arInfoSection
                 .padding(.horizontal, 32)
+                .padding(.top, 24)
                 .padding(.bottom, 12)
 
             Button(action: {
