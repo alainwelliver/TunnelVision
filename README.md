@@ -11,6 +11,7 @@ By Alain, Tomas, and Ben. Built for Penn's CIS 4120: HCI course.
 ## Assignment 5-related instructions:
 
 ## Where to find/run each technical implementation prototype:
+First navigate to the `requirements` folder.
 
 ### Technical Requirement 1: "Hello World" App
 #### How to find:
