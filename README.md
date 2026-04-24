@@ -1,5 +1,14 @@
-# hci-assignment-5
-CIS 4120 HCI Assignment 5 - Alain, Tomas, and Ben
+# TunnelVision
+By Alain, Tomas, and Ben. Built for Penn's CIS 4120: HCI course.
+
+## How to run:
+* Clone the repo
+* Open `TunnelVision Complete` as a project in Xcode
+* Select a **physical iPhone** as the run destination (a real camera feed is required for this prototype; Simulator is not sufficient for a meaningful demo).
+* Build and run (play button). When prompted, allow **Camera** and **Motion** access.
+* Tunnel safely!!
+
+## Assignment 5-related instructions:
 
 ## Where to find/run each technical implementation prototype:
 
